@@ -1,4 +1,4 @@
-fastapi
-uvicorn[standard]
-aiohttp
 flask
+gunicorn
+aiohttp
+aiohttp-socks
