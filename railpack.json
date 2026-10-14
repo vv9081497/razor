@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.railpack.com",
   "deploy": {
-    "startCommand": "uvicorn razor:app --host 0.0.0.0 --port $PORT"
+    "startCommand": "gunicorn -w 1 -k gthread --threads 8 -b 0.0.0.0:$PORT razor:app"
   }
 }
