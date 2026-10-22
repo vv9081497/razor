@@ -16,6 +16,7 @@ import string
 import threading
 from concurrent.futures import ThreadPoolExecutor
 import urllib3
+import os
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -569,4 +570,7 @@ if __name__ == "__main__":
     print(f"Port: 8095 | Attempts: {ATTEMPTS}")
     print("/kill?cc=4111111111111111|12|29|123&amount=10")
     print("Dev: @chirgg_911")
-    app.run(host="0.0.0.0", port=8095, debug=False, threaded=True)
+    
+    # Railway dynamic port fix
+    port = int(os.environ.get("PORT", 8095))
+    app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
