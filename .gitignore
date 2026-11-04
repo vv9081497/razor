@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+venv/
+results/
+*.log
+proxy_db.json
+session_cache.json
+proxy_cooldown.json
+proxy_failures.json
+proxy_dead.json
+site_cooldown.json
+.stats/
+tg_polling.lock
