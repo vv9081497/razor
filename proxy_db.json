@@ -1,0 +1,114 @@
+{
+  "proxies": {
+    "se-sto.pvdata.host:8080": {
+      "host": "se-sto.pvdata.host",
+      "port": "8080",
+      "user": "g2rTXpNfPdcw2fzGtWKp62yH",
+      "pass": "nizar1elad2",
+      "full_url": "se-sto.pvdata.host:8080:g2rTXpNfPdcw2fzGtWKp62yH:nizar1elad2",
+      "added_at": 1793736745.3645797,
+      "last_used": 1793737177.047282,
+      "times_used": 10
+    },
+    "ee-tal.pvdata.host:8080": {
+      "host": "ee-tal.pvdata.host",
+      "port": "8080",
+      "user": "g2rTXpNfPdcw2fzGtWKp62yH",
+      "pass": "nizar1elad2",
+      "full_url": "ee-tal.pvdata.host:8080:g2rTXpNfPdcw2fzGtWKp62yH:nizar1elad2",
+      "added_at": 1793736745.3645844,
+      "last_used": 1793737148.8170178,
+      "times_used": 6
+    },
+    "ca-mon.pvdata.host:8080": {
+      "host": "ca-mon.pvdata.host",
+      "port": "8080",
+      "user": "g2rTXpNfPdcw2fzGtWKp62yH",
+      "pass": "nizar1elad2",
+      "full_url": "ca-mon.pvdata.host:8080:g2rTXpNfPdcw2fzGtWKp62yH:nizar1elad2",
+      "added_at": 1793736745.3645866,
+      "last_used": 1793737076.2224221,
+      "times_used": 6
+    },
+    "proxy.sru.ac.th:8080": {
+      "host": "proxy.sru.ac.th",
+      "port": "8080",
+      "user": "patarawan.kah",
+      "pass": "patarawan.kah",
+      "full_url": "proxy.sru.ac.th:8080:patarawan.kah:patarawan.kah",
+      "added_at": 1793736745.3645885,
+      "last_used": 1793802179.7770996,
+      "times_used": 11
+    },
+    "co-bog.pvdata.host:8080": {
+      "host": "co-bog.pvdata.host",
+      "port": "8080",
+      "user": "g2rTXpNfPdcw2fzGtWKp62yH",
+      "pass": "nizar1elad2",
+      "full_url": "co-bog.pvdata.host:8080:g2rTXpNfPdcw2fzGtWKp62yH:nizar1elad2",
+      "added_at": 1793736745.3645902,
+      "last_used": 1793737093.2491434,
+      "times_used": 6
+    },
+    "pt-lis.pvdata.host:8080": {
+      "host": "pt-lis.pvdata.host",
+      "port": "8080",
+      "user": "g2rTXpNfPdcw2fzGtWKp62yH",
+      "pass": "nizar1elad2",
+      "full_url": "pt-lis.pvdata.host:8080:g2rTXpNfPdcw2fzGtWKp62yH:nizar1elad2",
+      "added_at": 1793736745.3645916,
+      "last_used": 1793737026.7375631,
+      "times_used": 2
+    },
+    "nz-auc.pvdata.host:8080": {
+      "host": "nz-auc.pvdata.host",
+      "port": "8080",
+      "user": "g2rTXpNfPdcw2fzGtWKp62yH",
+      "pass": "nizar1elad2",
+      "full_url": "nz-auc.pvdata.host:8080:g2rTXpNfPdcw2fzGtWKp62yH:nizar1elad2",
+      "added_at": 1793736745.3645935,
+      "last_used": 1793803391.914546,
+      "times_used": 6
+    },
+    "ro-buk.pvdata.host:8080": {
+      "host": "ro-buk.pvdata.host",
+      "port": "8080",
+      "user": "g2rTXpNfPdcw2fzGtWKp62yH",
+      "pass": "nizar1elad2",
+      "full_url": "ro-buk.pvdata.host:8080:g2rTXpNfPdcw2fzGtWKp62yH:nizar1elad2",
+      "added_at": 1793736745.3645945,
+      "last_used": 1793737132.7916527,
+      "times_used": 6
+    },
+    "cz-pra.pvdata.host:8080": {
+      "host": "cz-pra.pvdata.host",
+      "port": "8080",
+      "user": "g2rTXpNfPdcw2fzGtWKp62yH",
+      "pass": "nizar1elad2",
+      "full_url": "cz-pra.pvdata.host:8080:g2rTXpNfPdcw2fzGtWKp62yH:nizar1elad2",
+      "added_at": 1793802052.8462021,
+      "last_used": 0,
+      "times_used": 0
+    },
+    "gr-ath.pvdata.host:8080": {
+      "host": "gr-ath.pvdata.host",
+      "port": "8080",
+      "user": "g2rTXpNfPdcw2fzGtWKp62yH",
+      "pass": "nizar1elad2",
+      "full_url": "gr-ath.pvdata.host:8080:g2rTXpNfPdcw2fzGtWKp62yH:nizar1elad2",
+      "added_at": 1793802052.8462021,
+      "last_used": 0,
+      "times_used": 0
+    },
+    "il-tel.pvdata.host:8080": {
+      "host": "il-tel.pvdata.host",
+      "port": "8080",
+      "user": "g2rTXpNfPdcw2fzGtWKp62yH",
+      "pass": "nizar1elad2",
+      "full_url": "il-tel.pvdata.host:8080:g2rTXpNfPdcw2fzGtWKp62yH:nizar1elad2",
+      "added_at": 1793802063.0078552,
+      "last_used": 0,
+      "times_used": 0
+    }
+  }
+}
